@@ -1,0 +1,60 @@
+{
+  "name": "标准模板",
+  "template": {
+    "effect_type": "标准",
+    "font_type": "抖音美好体"
+  },
+  "font_style": {
+    "id": "7244518590332801592",
+    "path": "抖音美好体.ttf",
+    "size": 10,
+    "color": [1, 1, 1]
+  },
+  "keyframes": [
+    {
+      "property_type": "KFTypePositionX",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [-0.8]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 3000000,
+          "values": [0]
+        }
+      ]
+    },
+    {
+      "property_type": "KFTypeScale",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [0.8]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 3000000,
+          "values": [1.0]
+        }
+      ]
+    },
+    {
+      "property_type": "KFTypeOpacity",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [0.2]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 1000000,
+          "values": [1.0]
+        }
+      ]
+    }
+  ]
+}

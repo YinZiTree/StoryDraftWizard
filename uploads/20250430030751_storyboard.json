@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "text": "开局就被神明附身成为天使的人间体",
+      "content": "一个男孩被神明附身，背后展开六翼天使的虚影，周围环绕着神圣的光芒。",
+      "prompt": "Wide shot of a boy, being possessed by a deity with six-winged angelic aura, in a celestial environment, glowing light, realistic style, warm golden tones, divine atmosphere, low angle.",
+      "image_paths": [
+        "G:/uniapp-x/小说推文弃用/ApiSplitter4/ApiSplitter01 - 副本副本副本/ApiSplitter01 - 副本副本副本/outputs/books/1000000000000002780开局就被神明附身成为天使的人间体_202504241434_20250424143426/images/image_1745487408665.png"
+      ],
+      "audio_info": {
+        "path": "G:/uniapp-x/小说推文弃用/ApiSplitter4/ApiSplitter01 - 副本副本副本/ApiSplitter01 - 副本副本副本/outputs/books/1000000000000002780开局就被神明附身成为天使的人间体_202504241434_20250424143426/mp3/audio_1745579536.wav",
+        "duration": 6464
+      }
+    }
+  ],
+  "status": "success",
+  "lastUpdated": "2025-04-24T06:37:51.450Z"
+}

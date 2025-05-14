@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}卡密管理 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-md-3 col-lg-2">
+        {% include 'admin/sidebar.html' %}
+    </div>
+
+    <div class="col-md-9 col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>卡密管理</h2>
+            <a href="{{ url_for('admin.create_key') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i>生成卡密
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>卡密</th>
+                                <th>用户</th>
+                                <th>总次数</th>
+                                <th>剩余次数</th>
+                                <th>创建时间</th>
+                                <th>过期时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key in license_keys.items %}
+                                <tr>
+                                    <td>{{ key.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="text-truncate license-key" style="max-width: 150px;">{{ key.key }}</span>
+                                            <button class="btn btn-sm btn-link toggle-key" title="显示卡密">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-link copy-key" data-key="{{ key.key }}" title="复制卡密">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if key.user %}
+                                            <a href="{{ url_for('admin.user_detail', user_id=key.user.id) }}">{{ key.user.username }}</a>
+                                        {% else %}
+                                            <span class="text-muted">未分配</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ key.max_uses }}</td>
+                                    <td>{{ key.remaining_uses }}</td>
+                                    <td>{{ key.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ key.expires_at.strftime('%Y-%m-%d') if key.expires_at else '永不过期' }}</td>
+                                    <td>
+                                        {% if key.is_active %}
+                                            <span class="badge bg-success">启用</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">禁用</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <form method="post" action="{{ url_for('admin.toggle_key', key_id=key.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if key.is_active else 'success' }}" data-bs-toggle="tooltip" title="{{ '禁用' if key.is_active else '启用' }}">
+                                                    <i class="fas fa-{{ 'ban' if key.is_active else 'check' }}"></i>
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#sendKeyModal{{ key.id }}" title="发送卡密">
+                                                <i class="fas fa-envelope"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-primary" onclick="rechargeKey({{ key.id }})">
+                                                充值
+                                            </button>
+                                        </div>
+
+                                        <!-- 发送卡密模态框 -->
+                                        <div class="modal fade" id="sendKeyModal{{ key.id }}" tabindex="-1" aria-labelledby="sendKeyModalLabel{{ key.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="sendKeyModalLabel{{ key.id }}">发送卡密</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        {% if key.user %}
+                                                            <p>该卡密已绑定用户：{{ key.user.username }} ({{ key.user.email }})</p>
+                                                            <p>点击确认将向该用户发送卡密信息。</p>
+                                                        {% else %}
+                                                            <form method="post" action="{{ url_for('admin.send_key', key_id=key.id) }}">
+                                                                <div class="mb-3">
+                                                                    <label for="email" class="form-label">发送到邮箱</label>
+                                                                    <input type="email" class="form-control" id="email" name="email" required>
+                                                                </div>
+                                                                <div class="d-grid">
+                                                                    <button type="submit" class="btn btn-primary">发送</button>
+                                                                </div>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% if key.user %}
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                                            <form method="post" action="{{ url_for('admin.send_key', key_id=key.id) }}">
+                                                                <button type="submit" class="btn btn-primary">确认发送</button>
+                                                            </form>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页 -->
+                {% if license_keys.pages > 1 %}
+                    <nav aria-label="卡密列表分页">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {{ 'disabled' if license_keys.page == 1 else '' }}">
+                                <a class="page-link" href="{{ url_for('admin.keys', page=license_keys.prev_num) if license_keys.has_prev else '#' }}">上一页</a>
+                            </li>
+
+                            {% for page_num in license_keys.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    <li class="page-item {{ 'active' if page_num == license_keys.page else '' }}">
+                                        <a class="page-link" href="{{ url_for('admin.keys', page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">...</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            <li class="page-item {{ 'disabled' if license_keys.page == license_keys.pages else '' }}">
+                                <a class="page-link" href="{{ url_for('admin.keys', page=license_keys.next_num) if license_keys.has_next else '#' }}">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 卡密显示/隐藏
+    const toggleButtons = document.querySelectorAll('.toggle-key');
+    if (toggleButtons.length > 0) {
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const keyElement = this.previousElementSibling;
+                if (keyElement.classList.contains('text-truncate')) {
+                    keyElement.classList.remove('text-truncate');
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    this.setAttribute('title', '隐藏卡密');
+                } else {
+                    keyElement.classList.add('text-truncate');
+                    this.innerHTML = '<i class="fas fa-eye"></i>';
+                    this.setAttribute('title', '显示卡密');
+                }
+            });
+        });
+    }
+
+    // 复制到剪贴板
+    const copyButtons = document.querySelectorAll('.copy-key');
+    if (copyButtons.length > 0) {
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const keyText = this.getAttribute('data-key');
+                navigator.clipboard.writeText(keyText).then(function() {
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(function() {
+                        button.innerHTML = originalText;
+                    }, 2000);
+                }, function(err) {
+                    console.error('复制失败: ', err);
+                });
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

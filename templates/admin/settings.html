@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}系统设置 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-md-3 col-lg-2">
+        {% include 'admin/sidebar.html' %}
+    </div>
+    
+    <div class="col-md-9 col-lg-10">
+        <div class="mb-4">
+            <h2>系统设置</h2>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">基本设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{{ url_for('admin.settings') }}" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="trial_uses" class="form-label">试用卡密使用次数</label>
+                                <input type="number" class="form-control" id="trial_uses" name="trial_uses" value="{{ config.trial_uses }}" min="1" required>
+                                <div class="form-text">新用户注册时自动获得的试用卡密可用次数</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="license_key_uses" class="form-label">默认卡密使用次数</label>
+                                <input type="number" class="form-control" id="license_key_uses" name="license_key_uses" value="{{ config.license_key_uses }}" min="1" required>
+                                <div class="form-text">默认生成的卡密可用次数</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>保存设置
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">邮件设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="#" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="mail_server" class="form-label">SMTP服务器</label>
+                                <input type="text" class="form-control" id="mail_server" name="mail_server" value="smtp.qq.com" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mail_port" class="form-label">SMTP端口</label>
+                                <input type="number" class="form-control" id="mail_port" name="mail_port" value="465" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mail_username" class="form-label">SMTP用户名</label>
+                                <input type="text" class="form-control" id="mail_username" name="mail_username" value="1576129288@qq.com" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mail_password" class="form-label">SMTP密码/授权码</label>
+                                <input type="password" class="form-control" id="mail_password" name="mail_password" value="********" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mail_sender" class="form-label">发件人</label>
+                                <input type="email" class="form-control" id="mail_sender" name="mail_sender" value="1576129288@qq.com" readonly>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-outline-primary" disabled>
+                                    <i class="fas fa-envelope me-1"></i>发送测试邮件
+                                </button>
+                                <small class="form-text text-muted mt-2">注意：邮件设置已通过环境变量配置，如需修改请调整配置文件</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">系统信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>系统版本</span>
+                                <span>1.0.0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Flask版本</span>
+                                <span>2.0.1</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Python版本</span>
+                                <span>3.9.x</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>数据库</span>
+                                <span>SQLite</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>管理员用户</span>
+                                <span>{{ current_user.username }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">系统维护</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-warning" onclick="if(confirm('确定要清理过期卡密吗？此操作不可撤销。')) alert('清理完成');">
+                                <i class="fas fa-broom me-1"></i>清理过期卡密
+                            </button>
+                            <button type="button" class="btn btn-outline-info" onclick="if(confirm('确定要清理临时文件吗？此操作不可撤销。')) alert('清理完成');">
+                                <i class="fas fa-trash me-1"></i>清理临时文件
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" onclick="alert('数据库备份功能尚未实现');">
+                                <i class="fas fa-database me-1"></i>备份数据库
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

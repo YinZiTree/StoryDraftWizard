@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}模板示例 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">模板示例和使用说明</h5>
+            </div>
+            <div class="card-body">
+                <h4>如何创建和使用草稿模板</h4>
+                <p>草稿模板可以帮助你快速生成具有特定风格的剪映草稿，以下是创建和使用模板的步骤：</p>
+                
+                <h5 class="mt-4">1. 模板文件结构</h5>
+                <p>模板文件是一个JSON格式的文件，包含以下主要部分：</p>
+                <ul>
+                    <li><strong>name</strong>：模板名称</li>
+                    <li><strong>template</strong>：模板基本配置</li>
+                    <li><strong>font_style</strong>：字体样式设置</li>
+                    <li><strong>keyframes</strong>：关键帧动画设置</li>
+                </ul>
+                
+                <h5 class="mt-4">2. 完整的模板示例</h5>
+                <pre class="bg-light p-3 rounded">
+{
+  "name": "渐入缩放模板",
+  "template": {
+    "effect_type": "渐入",
+    "font_type": "抖音美好体"
+  },
+  "font_style": {
+    "id": "7244518590332801592",
+    "path": "抖音美好体.ttf",
+    "size": 10,
+    "color": [1, 1, 1]
+  },
+  "keyframes": [
+    {
+      "property_type": "KFTypePositionX",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [-0.8]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 3000000,
+          "values": [0]
+        }
+      ]
+    },
+    {
+      "property_type": "KFTypeScale",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [0.8]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 3000000,
+          "values": [1.0]
+        }
+      ]
+    },
+    {
+      "property_type": "KFTypeOpacity",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [0.2]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 1000000,
+          "values": [1.0]
+        }
+      ]
+    }
+  ]
+}
+                </pre>
+                
+                <h5 class="mt-4">3. 字体样式说明</h5>
+                <p>字体样式定义了文本素材的外观：</p>
+                <ul>
+                    <li><strong>id</strong>：字体ID，通常可以使用默认值</li>
+                    <li><strong>path</strong>：字体文件路径，指定要使用的字体</li>
+                    <li><strong>size</strong>：字体大小，数值越大文字越大</li>
+                    <li><strong>color</strong>：字体颜色，使用RGB值的数组，范围是0到1</li>
+                </ul>
+                <p>字体颜色示例：</p>
+                <ul>
+                    <li>白色：[1, 1, 1]</li>
+                    <li>黑色：[0, 0, 0]</li>
+                    <li>红色：[1, 0, 0]</li>
+                    <li>绿色：[0, 1, 0]</li>
+                    <li>蓝色：[0, 0, 1]</li>
+                </ul>
+                
+                <h5 class="mt-4">4. 关键帧动画说明</h5>
+                <p>关键帧定义了素材随时间变化的动画效果：</p>
+                <ul>
+                    <li><strong>property_type</strong>：属性类型，指定要调整的属性</li>
+                    <li><strong>keyframe_list</strong>：关键帧列表，定义不同时间点的属性值</li>
+                </ul>
+                <p>常用的属性类型有：</p>
+                <ul>
+                    <li><strong>KFTypePositionX</strong>：X轴位置，范围通常为-1到1</li>
+                    <li><strong>KFTypePositionY</strong>：Y轴位置，范围通常为-1到1</li>
+                    <li><strong>KFTypeScale</strong>：缩放，1表示原始大小</li>
+                    <li><strong>KFTypeRotation</strong>：旋转，以角度为单位</li>
+                    <li><strong>KFTypeOpacity</strong>：透明度，0表示完全透明，1表示完全不透明</li>
+                </ul>
+                <p>每个关键帧包含：</p>
+                <ul>
+                    <li><strong>curveType</strong>：曲线类型，通常为"Line"线性变化</li>
+                    <li><strong>time_offset</strong>：时间偏移，以微秒为单位</li>
+                    <li><strong>values</strong>：属性值，根据属性类型有不同的含义</li>
+                </ul>
+                
+                <h5 class="mt-4">5. 如何添加到系统</h5>
+                <p>创建好模板文件后，有两种方式可以添加到系统：</p>
+                <ol>
+                    <li>通过管理员界面上传：在模板管理页面点击"上传模板"按钮</li>
+                    <li>手动添加：将模板文件放到 <code>temp/templates/</code> 目录下</li>
+                </ol>
+                <p>系统会自动检测和加载所有位于 <code>temp/templates/</code> 目录下的JSON文件作为模板。</p>
+                
+                <h5 class="mt-4">6. 常见问题</h5>
+                <ul>
+                    <li>
+                        <strong>Q: 为什么我的模板没有被加载？</strong><br>
+                        A: 请确保JSON格式正确，并且包含所需的字段。可以使用在线JSON校验工具检查格式。
+                    </li>
+                    <li>
+                        <strong>Q: 时间单位是什么？</strong><br>
+                        A: 时间单位是微秒，1秒 = 1,000,000微秒。例如3秒就是3000000。
+                    </li>
+                    <li>
+                        <strong>Q: 如何创建淡入淡出效果？</strong><br>
+                        A: 可以使用KFTypeOpacity属性，设置从0到1的变化来创建淡入效果。
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

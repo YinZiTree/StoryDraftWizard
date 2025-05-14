@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5 fade-in">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">剪映草稿生成器</h1>
+            <p class="lead mb-4">简单高效的剪映草稿模板生成工具，帮您快速创建专业视频编辑项目。</p>
+            <p class="mb-4">通过上传分镜 storyboard.json 文件，自动生成完整的剪映工程文件，节省您宝贵的时间。</p>
+            <div class="d-grid gap-2 d-md-flex">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('generator.dashboard') }}" class="btn btn-primary btn-lg px-4 me-md-2">开始使用</a>
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">立即注册</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">登录</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6 mt-5 mt-lg-0 text-center">
+            <div class="card bg-dark shadow-lg">
+                <div class="card-body p-5">
+                    <i class="fas fa-film fa-5x mb-4 text-primary"></i>
+                    <h3 class="card-title">专业视频模板</h3>
+                    <p class="card-text">上传您的 storyboard.json 文件，我们将为您生成可直接在剪映中使用的专业草稿模板。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <h2 class="text-center mb-5">功能特点</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-bolt fa-3x mb-3 text-primary"></i>
+                    <h4 class="card-title">快速生成</h4>
+                    <p class="card-text">只需上传 storyboard.json 文件，几秒钟内即可生成完整的剪映草稿模板，节省宝贵时间。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-cog fa-3x mb-3 text-primary"></i>
+                    <h4 class="card-title">自定义设置</h4>
+                    <p class="card-text">根据您的需求定制草稿模板，支持自定义背景、音频与文本等多样化设置。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-download fa-3x mb-3 text-primary"></i>
+                    <h4 class="card-title">直接下载</h4>
+                    <p class="card-text">生成完成后，即可下载完整的工程文件，直接导入剪映软件开始编辑您的专业视频。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <h2 class="text-center mb-5">使用步骤</h2>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                        <h3 class="m-0">1</h3>
+                    </div>
+                    <h4>注册账号</h4>
+                    <p>创建您的账号，验证邮箱后即可开始使用。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                        <h3 class="m-0">2</h3>
+                    </div>
+                    <h4>激活卡密</h4>
+                    <p>在控制台中激活您的卡密，获取生成次数。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                        <h3 class="m-0">3</h3>
+                    </div>
+                    <h4>上传文件</h4>
+                    <p>上传您的 storyboard.json 分镜文件。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                        <h3 class="m-0">4</h3>
+                    </div>
+                    <h4>下载模板</h4>
+                    <p>点击生成按钮，获取剪映草稿模板，直接导入使用。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 text-center">
+    <h2 class="mb-4">立即开始您的专业视频创作之旅</h2>
+    <p class="lead mb-4">加入我们的用户社区，享受专业、高效的剪映草稿模板生成服务。</p>
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('generator.dashboard') }}" class="btn btn-primary btn-lg px-5">开始使用</a>
+    {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-5">立即注册</a>
+    {% endif %}
+</section>
+{% endblock %}

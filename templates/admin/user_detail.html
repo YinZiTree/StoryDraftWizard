@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}用户详情 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-md-3 col-lg-2">
+        {% include 'admin/sidebar.html' %}
+    </div>
+    
+    <div class="col-md-9 col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>用户详情</h2>
+            <div>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>返回用户列表
+                </a>
+                {% if not user.is_admin %}
+                    <form method="post" action="{{ url_for('admin.toggle_user', user_id=user.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-{{ 'warning' if user.is_active else 'success' }}">
+                            <i class="fas fa-{{ 'ban' if user.is_active else 'check' }} me-1"></i>{{ '禁用用户' if user.is_active else '启用用户' }}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">基本信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 text-center">
+                            <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px; font-size: 40px;">
+                                {{ user.username[0] | upper }}
+                            </div>
+                        </div>
+                        
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>用户ID</th>
+                                    <td>{{ user.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>用户名</th>
+                                    <td>
+                                        {{ user.username }}
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-danger">管理员</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>邮箱</th>
+                                    <td>{{ user.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>状态</th>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">已激活</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">未激活</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>注册时间</th>
+                                    <td>{{ user.registration_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>最后登录</th>
+                                    <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else '从未登录' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">卡密列表</h5>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
+                            <i class="fas fa-plus-circle me-1"></i>分配卡密
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if license_keys %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>卡密</th>
+                                            <th>总次数</th>
+                                            <th>剩余次数</th>
+                                            <th>创建时间</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for key in license_keys %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="text-truncate license-key" style="max-width: 150px;">{{ key.key }}</span>
+                                                        <button class="btn btn-sm btn-link toggle-key" title="显示卡密">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>{{ key.max_uses }}</td>
+                                                <td>{{ key.remaining_uses }}</td>
+                                                <td>{{ key.created_at.strftime('%Y-%m-%d') }}</td>
+                                                <td>
+                                                    {% if key.is_active %}
+                                                        <span class="badge bg-success">启用</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">禁用</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <form method="post" action="{{ url_for('admin.toggle_key', key_id=key.id) }}">
+                                                            <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if key.is_active else 'success' }}" data-bs-toggle="tooltip" title="{{ '禁用' if key.is_active else '启用' }}">
+                                                                <i class="fas fa-{{ 'ban' if key.is_active else 'check' }}"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form method="post" action="{{ url_for('admin.send_key', key_id=key.id) }}">
+                                                            <button type="submit" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="发送卡密">
+                                                                <i class="fas fa-envelope"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <p>该用户还没有卡密</p>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyModal">
+                                    <i class="fas fa-plus-circle me-1"></i>分配卡密
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">使用记录</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if usage_logs %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>卡密</th>
+                                            <th>文件名</th>
+                                            <th>时间</th>
+                                            <th>IP地址</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in usage_logs %}
+                                            <tr>
+                                                <td>{{ log.id }}</td>
+                                                <td>
+                                                    {% if log.license_key %}
+                                                        <span class="text-truncate" style="max-width: 100px;">{{ log.license_key.key }}</span>
+                                                    {% else %}
+                                                        <span class="text-muted">未记录</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ log.storyboard_file }}</td>
+                                                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                                <td>{{ log.ip_address }}</td>
+                                                <td>
+                                                    {% if log.success %}
+                                                        <span class="badge bg-success">成功</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger" data-bs-toggle="tooltip" title="{{ log.error_message }}">失败</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <p>暂无使用记录</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加卡密模态框 -->
+<div class="modal fade" id="addKeyModal" tabindex="-1" aria-labelledby="addKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addKeyModalLabel">分配卡密给用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addKeyForm" method="post" action="#">
+                    <div class="mb-3">
+                        <label class="form-label">选项</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="key_option" id="option_new" value="new" checked>
+                            <label class="form-check-label" for="option_new">
+                                生成新卡密
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="key_option" id="option_existing" value="existing">
+                            <label class="form-check-label" for="option_existing">
+                                分配现有卡密
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="new_key_options">
+                        <div class="mb-3">
+                            <label for="max_uses" class="form-label">使用次数</label>
+                            <input type="number" class="form-control" id="max_uses" name="max_uses" value="50" min="1" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expires_days" class="form-label">有效期(天)</label>
+                            <input type="number" class="form-control" id="expires_days" name="expires_days" value="0" min="0">
+                            <div class="form-text">0表示永不过期</div>
+                        </div>
+                    </div>
+                    
+                    <div id="existing_key_options" style="display: none;">
+                        <div class="mb-3">
+                            <label for="key_id" class="form-label">选择卡密</label>
+                            <select class="form-select" id="key_id" name="key_id">
+                                <option value="">请选择卡密</option>
+                                <!-- 这里应该通过AJAX获取未分配的卡密列表 -->
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('addKeyForm').submit()">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 卡密显示/隐藏
+    const toggleButtons = document.querySelectorAll('.toggle-key');
+    if (toggleButtons.length > 0) {
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const keyElement = this.previousElementSibling;
+                if (keyElement.classList.contains('text-truncate')) {
+                    keyElement.classList.remove('text-truncate');
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    this.setAttribute('title', '隐藏卡密');
+                } else {
+                    keyElement.classList.add('text-truncate');
+                    this.innerHTML = '<i class="fas fa-eye"></i>';
+                    this.setAttribute('title', '显示卡密');
+                }
+            });
+        });
+    }
+    
+    // 卡密选项切换
+    const optionNew = document.getElementById('option_new');
+    const optionExisting = document.getElementById('option_existing');
+    const newKeyOptions = document.getElementById('new_key_options');
+    const existingKeyOptions = document.getElementById('existing_key_options');
+    
+    if (optionNew && optionExisting && newKeyOptions && existingKeyOptions) {
+        optionNew.addEventListener('change', function() {
+            if (this.checked) {
+                newKeyOptions.style.display = 'block';
+                existingKeyOptions.style.display = 'none';
+            }
+        });
+        
+        optionExisting.addEventListener('change', function() {
+            if (this.checked) {
+                newKeyOptions.style.display = 'none';
+                existingKeyOptions.style.display = 'block';
+                // 加载未分配的卡密列表
+                fetch('/admin/api/unassigned-keys')
+                    .then(response => response.json())
+                    .then(data => {
+                        const keySelect = document.getElementById('key_id');
+                        keySelect.innerHTML = '<option value="">请选择卡密</option>';
+                        
+                        data.keys.forEach(key => {
+                            keySelect.innerHTML += `<option value="${key.id}">${key.key} (可用次数: ${key.remaining_uses})</option>`;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('获取卡密列表失败:', error);
+                    });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

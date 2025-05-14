@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}控制台 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-lg-3">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5 class="card-title">欢迎回来，{{ current_user.username }}</h5>
+                <p class="card-text text-muted">用户ID: {{ current_user.id }}</p>
+                <p class="card-text">
+                    <small class="text-muted">注册时间: {{ current_user.registration_date.strftime('%Y-%m-%d') }}</small>
+                </p>
+                {% if current_user.last_login %}
+                <p class="card-text">
+                    <small class="text-muted">上次登录: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') }}</small>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">可用次数</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="usage-count">{{ total_remaining }}</div>
+                <p class="card-text">剩余生成次数</p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">我的卡密</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#activateKeyModal">
+                    <i class="fas fa-plus-circle me-1"></i>激活卡密
+                </button>
+            </div>
+            <div class="card-body">
+                {% if license_keys %}
+                    <div class="list-group">
+                        {% for key in license_keys %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="me-2 text-truncate license-key">{{ key.key }}</div>
+                                    <button class="btn btn-sm btn-link toggle-key" title="显示卡密">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-link copy-key" data-key="{{ key.key }}" title="复制卡密">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">剩余次数: {{ key.remaining_uses }}</small>
+                                    <small class="text-muted">已用: {{ key.max_uses - key.remaining_uses }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-3">
+                        <p>您还没有激活的卡密</p>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#activateKeyModal">
+                            <i class="fas fa-plus-circle me-1"></i>激活卡密
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-9">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">生成剪映草稿</h5>
+            </div>
+            <div class="card-body">
+                {% if total_remaining > 0 %}
+                    <form method="post" action="{{ url_for('generator.generate') }}" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="file-upload-wrapper mb-4">
+                            <div class="mb-3 text-center">
+                                <i class="fas fa-file-upload fa-3x mb-3 text-primary"></i>
+                                <h5>上传 storyboard.json 文件</h5>
+                                <p class="text-muted">拖放文件到此处或点击下方按钮选择文件</p>
+                            </div>
+                            <input type="file" name="storyboard_file" id="storyboard_file" class="form-control" accept=".json" required style="display: none;">
+                            <div class="text-center">
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('storyboard_file').click()">
+                                    <i class="fas fa-folder-open me-1"></i>选择文件
+                                </button>
+                                <div class="mt-2" id="file-name">未选择文件</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="template" class="form-label">选择模板</label>
+                            <select class="form-select" id="template" name="template">
+                                {% if templates %}
+                                    {% for template in templates %}
+                                        <option value="{{ template.file }}">{{ template.name }} ({{ template.effect_type }} - {{ template.font_type }})</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="standard.json">标准模板</option>
+                                {% endif %}
+                            </select>
+                            <div class="form-text">选择生成草稿时使用的模板样式</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="draft_name" class="form-label">草稿名称</label>
+                            <input type="text" class="form-control" id="draft_name" name="draft_name" placeholder="请输入草稿名称（选填）">
+                            <div class="form-text">草稿名称将显示在剪映中，留空则使用默认名称</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="background" class="form-label">背景图片（可选）</label>
+                            <input type="file" class="form-control" id="background" name="background" accept="image/*">
+                            <div class="form-text">可以上传自定义背景图片，不上传则使用默认背景</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary py-2">
+                                <i class="fas fa-cog me-1"></i>生成草稿文件
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>您没有可用的生成次数</h5>
+                        <p>请激活一个卡密以继续使用服务。</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#activateKeyModal">
+                            <i class="fas fa-plus-circle me-1"></i>激活卡密
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">生成记录</h5>
+                <span class="badge bg-secondary">最近10条</span>
+            </div>
+            <div class="card-body">
+                {% if usage_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>文件名</th>
+                                    <th>时间</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in usage_logs %}
+                                    <tr>
+                                        <td>{{ log.id }}</td>
+                                        <td>{{ log.storyboard_file }}</td>
+                                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if log.success %}
+                                                <span class="badge bg-success">成功</span>
+                                            {% else %}
+                                                <span class="badge bg-danger" data-bs-toggle="tooltip" title="{{ log.error_message }}">失败</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <p>暂无生成记录</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 激活卡密模态框 -->
+<div class="modal fade" id="activateKeyModal" tabindex="-1" aria-labelledby="activateKeyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activateKeyModalLabel">激活卡密</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{{ url_for('auth.activate_key') }}">
+                    <div class="mb-3">
+                        <label for="key_code" class="form-label">卡密</label>
+                        <input type="text" class="form-control" id="key_code" name="key_code" required placeholder="请输入卡密">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">激活</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

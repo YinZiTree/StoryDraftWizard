@@ -1,0 +1,48 @@
+<div class="sidebar">
+    <div class="d-flex flex-column flex-shrink-0 p-3 text-white">
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="{{ url_for('admin.index') }}" class="nav-link text-white {% if request.path == url_for('admin.index') %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    仪表盘
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin.users') }}" class="nav-link text-white {% if request.path == url_for('admin.users') %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    用户管理
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin.keys') }}" class="nav-link text-white {% if request.path == url_for('admin.keys') %}active{% endif %}">
+                    <i class="fas fa-key"></i>
+                    卡密管理
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin.statistics') }}" class="nav-link text-white {% if request.path == url_for('admin.statistics') %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i>
+                    使用统计
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin.settings') }}" class="nav-link text-white {% if request.path == url_for('admin.settings') %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    系统设置
+                </a>
+            </li>
+        </ul>
+        <hr>
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-circle fa-2x me-2"></i>
+                <strong>{{ current_user.username }}</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser">
+                <li><a class="dropdown-item" href="{{ url_for('generator.dashboard') }}">返回主站</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

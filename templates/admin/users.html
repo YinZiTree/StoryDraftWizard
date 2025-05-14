@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}用户管理 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-md-3 col-lg-2">
+        {% include 'admin/sidebar.html' %}
+    </div>
+    
+    <div class="col-md-9 col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>用户管理</h2>
+            <div class="input-group" style="max-width: 300px;">
+                <input type="text" class="form-control" placeholder="搜索用户..." id="search-user">
+                <button class="btn btn-primary" type="button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>邮箱</th>
+                                <th>注册时间</th>
+                                <th>最后登录</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users.items %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.user_detail', user_id=user.id) }}">{{ user.username }}</a>
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-danger">管理员</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.registration_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else '从未登录' }}</td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">已激活</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">未激活</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="查看详情">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if not user.is_admin %}
+                                                <form method="post" action="{{ url_for('admin.toggle_user', user_id=user.id) }}" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if user.is_active else 'success' }}" data-bs-toggle="tooltip" title="{{ '禁用' if user.is_active else '启用' }}">
+                                                        <i class="fas fa-{{ 'ban' if user.is_active else 'check' }}"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                {% if users.pages > 1 %}
+                    <nav aria-label="用户列表分页">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {{ 'disabled' if users.page == 1 else '' }}">
+                                <a class="page-link" href="{{ url_for('admin.users', page=users.prev_num) if users.has_prev else '#' }}">上一页</a>
+                            </li>
+                            
+                            {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    <li class="page-item {{ 'active' if page_num == users.page else '' }}">
+                                        <a class="page-link" href="{{ url_for('admin.users', page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">...</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <li class="page-item {{ 'disabled' if users.page == users.pages else '' }}">
+                                <a class="page-link" href="{{ url_for('admin.users', page=users.next_num) if users.has_next else '#' }}">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

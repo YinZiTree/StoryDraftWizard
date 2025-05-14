@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}模板管理 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">草稿模板管理</h5>
+                {% if current_user.is_admin %}
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadTemplateModal">
+                    <i class="fas fa-plus-circle me-1"></i>上传模板
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if templates %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>效果类型</th>
+                                    <th>字体类型</th>
+                                    <th>文件名</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for template in templates %}
+                                    <tr>
+                                        <td>{{ template.name }}</td>
+                                        <td>{{ template.effect_type }}</td>
+                                        <td>{{ template.font_type }}</td>
+                                        <td>{{ template.file }}</td>
+                                        <td>
+                                            {% if current_user.is_admin %}
+                                                <button class="btn btn-sm btn-danger delete-template" data-filename="{{ template.file }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <p>暂无模板</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">模板格式说明</h5>
+            </div>
+            <div class="card-body">
+                <p>模板文件是一个JSON格式的文件，包含以下结构：</p>
+                <pre class="bg-light p-3 rounded">
+{
+  "name": "模板名称",
+  "template": {
+    "effect_type": "标准",
+    "font_type": "抖音美好体"
+  },
+  "font_style": {
+    "id": "7244518590332801592",
+    "path": "抖音美好体.ttf",
+    "size": 10,
+    "color": [1, 1, 1]
+  },
+  "keyframes": [
+    {
+      "property_type": "KFTypePositionX",
+      "keyframe_list": [
+        {
+          "curveType": "Line",
+          "time_offset": 0,
+          "values": [-0.8]
+        },
+        {
+          "curveType": "Line",
+          "time_offset": 3000000,
+          "values": [0]
+        }
+      ]
+    }
+  ]
+}
+                </pre>
+                <p>你可以自定义以下部分：</p>
+                <ul>
+                    <li><strong>name</strong>：模板的名称</li>
+                    <li><strong>template.effect_type</strong>：效果类型，如"标准"、"电影"、"抖音"等</li>
+                    <li><strong>template.font_type</strong>：字体类型，如"默认"、"抖音美好体"等</li>
+                    <li><strong>font_style</strong>：字体样式设置</li>
+                    <li><strong>keyframes</strong>：关键帧动画设置</li>
+                </ul>
+                <p>关键帧属性类型(property_type)可以是：</p>
+                <ul>
+                    <li><strong>KFTypePositionX</strong>：X轴位置</li>
+                    <li><strong>KFTypePositionY</strong>：Y轴位置</li>
+                    <li><strong>KFTypeScale</strong>：缩放</li>
+                    <li><strong>KFTypeRotation</strong>：旋转</li>
+                    <li><strong>KFTypeOpacity</strong>：透明度</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 上传模板模态框 -->
+{% if current_user.is_admin %}
+<div class="modal fade" id="uploadTemplateModal" tabindex="-1" aria-labelledby="uploadTemplateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadTemplateModalLabel">上传模板</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{{ url_for('templates.upload') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="template_name" class="form-label">模板名称</label>
+                        <input type="text" class="form-control" id="template_name" name="template_name" required placeholder="请输入模板名称">
+                    </div>
+                    <div class="mb-3">
+                        <label for="effect_type" class="form-label">效果类型</label>
+                        <input type="text" class="form-control" id="effect_type" name="effect_type" placeholder="请输入效果类型" value="标准">
+                    </div>
+                    <div class="mb-3">
+                        <label for="font_type" class="form-label">字体类型</label>
+                        <input type="text" class="form-control" id="font_type" name="font_type" placeholder="请输入字体类型" value="默认">
+                    </div>
+                    <div class="mb-3">
+                        <label for="template_file" class="form-label">模板文件</label>
+                        <input type="file" class="form-control" id="template_file" name="template_file" required accept=".json">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">上传</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 删除模板
+        const deleteButtons = document.querySelectorAll('.delete-template');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const filename = this.getAttribute('data-filename');
+                if (confirm(`确定要删除模板 ${filename} 吗？`)) {
+                    fetch(`{{ url_for('templates.delete', filename='') }}${filename}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('删除模板失败');
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

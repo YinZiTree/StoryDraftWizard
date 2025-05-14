@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}使用统计 - 剪映草稿生成器{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-md-3 col-lg-2">
+        {% include 'admin/sidebar.html' %}
+    </div>
+    
+    <div class="col-md-9 col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>使用统计</h2>
+            <div class="form-inline">
+                <select class="form-select" id="time-range">
+                    <option value="day" {% if time_range == 'day' %}selected{% endif %}>今日</option>
+                    <option value="week" {% if time_range == 'week' %}selected{% endif %}>本周</option>
+                    <option value="month" {% if time_range == 'month' %}selected{% endif %}>本月</option>
+                    <option value="year" {% if time_range == 'year' %}selected{% endif %}>本年</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">使用次数统计</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="usageChart" data-chart="usage" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">注册用户统计</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="registrationChart" data-chart="registrations" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">使用量统计表</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>使用次数</th>
+                                <th>新增用户</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBody">
+                            <!-- 数据将通过JavaScript动态加载 -->
+                            <tr>
+                                <td colspan="3" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 加载统计表格数据
+    fetch(`/admin/api/statistics?range={{ time_range }}`)
+        .then(response => response.json())
+        .then(data => {
+            // 合并用量和注册数据
+            const tableData = {};
+            
+            // 处理使用数据
+            data.usage.forEach(item => {
+                if (!tableData[item.label]) {
+                    tableData[item.label] = { label: item.label, usage: 0, registrations: 0 };
+                }
+                tableData[item.label].usage = item.value;
+            });
+            
+            // 处理注册数据
+            data.registrations.forEach(item => {
+                if (!tableData[item.label]) {
+                    tableData[item.label] = { label: item.label, usage: 0, registrations: 0 };
+                }
+                tableData[item.label].registrations = item.value;
+            });
+            
+            // 转换为数组并排序
+            const sortedData = Object.values(tableData).sort((a, b) => {
+                return a.label.localeCompare(b.label);
+            });
+            
+            // 更新表格
+            const tableBody = document.getElementById('statsTableBody');
+            if (tableBody) {
+                if (sortedData.length > 0) {
+                    tableBody.innerHTML = '';
+                    sortedData.forEach(item => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${item.label}</td>
+                                <td>${item.usage}</td>
+                                <td>${item.registrations}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="3" class="text-center">暂无数据</td></tr>`;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('获取统计数据失败:', error);
+            const tableBody = document.getElementById('statsTableBody');
+            if (tableBody) {
+                tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">加载数据失败</td></tr>`;
+            }
+        });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}500 - 服务器错误{% endblock %}
+
+{% block content %}
+<div class="text-center py-5 fade-in">
+    <div class="display-1 text-muted">500</div>
+    <h1 class="mb-4">服务器错误</h1>
+    <p class="lead mb-5">抱歉，服务器出现错误，请稍后再试。</p>
+    <a href="{{ url_for('generator.index') }}" class="btn btn-primary">
+        <i class="fas fa-home me-2"></i>返回首页
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}生成卡密 - 剪映草稿生成器{% endblock %}
+
+{% block content %}
+<div class="row fade-in">
+    <div class="col-md-3 col-lg-2">
+        {% include 'admin/sidebar.html' %}
+    </div>
+    
+    <div class="col-md-9 col-lg-10">
+        <div class="mb-4">
+            <h2>生成卡密</h2>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">批量生成卡密</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{{ url_for('admin.create_key') }}" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="count" class="form-label">生成数量</label>
+                                <input type="number" class="form-control" id="count" name="count" value="1" min="1" max="100" required>
+                                <div class="form-text">一次最多可生成100个卡密</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="max_uses" class="form-label">使用次数</label>
+                                <input type="number" class="form-control" id="max_uses" name="max_uses" value="50" min="1" required>
+                                <div class="form-text">每个卡密可使用的次数</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="expires_days" class="form-label">有效期(天)</label>
+                                <input type="number" class="form-control" id="expires_days" name="expires_days" value="0" min="0">
+                                <div class="form-text">卡密有效期天数，0表示永不过期</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key me-1"></i>生成卡密
+                                </button>
+                                <a href="{{ url_for('admin.keys') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>返回
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">卡密生成说明</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">生成的卡密格式为：LK-XXXXXXXX</li>
+                            <li class="list-group-item">卡密生成后默认为启用状态</li>
+                            <li class="list-group-item">您可以在卡密列表中查看和管理所有卡密</li>
+                            <li class="list-group-item">卡密可以通过邮件发送给用户</li>
+                            <li class="list-group-item">用户激活卡密后，卡密将与该用户绑定</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
